@@ -66,13 +66,13 @@
         }
         
         .progress-bar-fill.low {
-            background: linear-gradient(90deg, #f44336 0%, #da190b 100%);
-            box-shadow: 0 2px 4px rgba(244, 67, 54, 0.3);
+            background: linear-gradient(90deg, #2196F3 0%, #1976D2 100%);
+            box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
         }
         
         .progress-bar-fill.medium {
-            background: linear-gradient(90deg, #ff9800 0%, #fb8c00 100%);
-            box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);
+            background: linear-gradient(90deg, #2196F3 0%, #1976D2 100%);
+            box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
         }
         
         .progress-bar-fill.high {
@@ -81,8 +81,8 @@
         }
         
         .progress-bar-fill.complete {
-            background: linear-gradient(90deg, #2196F3 0%, #1976D2 100%);
-            box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
+            background: linear-gradient(90deg, #4CAF50 0%, #45a049 100%);
+            box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
         }
         
         .percentage-text {
@@ -96,11 +96,51 @@
             text-shadow: 0 0 3px white, 0 0 3px white, 0 0 3px white;
         }
         
-        .module-info {
-            margin-top: 8px;
-            font-size: 13px;
-            color: #555;
-            font-style: italic;
+        /* Module circles visualization */
+        .module-circles {
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .module-circle {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            background: white;
+            transition: all 0.3s ease;
+        }
+        
+        .module-circle.completed {
+            background: #4CAF50;
+            border-color: #4CAF50;
+        }
+        
+        .module-circle.current {
+            width: auto;
+            min-width: 60px;
+            height: 20px;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #2196F3 0%, #1976D2 100%);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 0 8px;
+            box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
+        }
+        
+        .module-circle.current .module-progress {
+            display: flex;
+            align-items: center;
+            gap: 3px;
         }
 
         /* Compact mode styling */
@@ -113,9 +153,20 @@
             height: 18px;
         }
         
-        .compact .module-info {
-            font-size: 11px;
-            margin-top: 5px;
+        .compact .module-circles {
+            margin-top: 8px;
+            gap: 6px;
+        }
+        
+        .compact .module-circle {
+            width: 12px;
+            height: 12px;
+        }
+        
+        .compact .module-circle.current {
+            min-width: 50px;
+            height: 16px;
+            font-size: 9px;
         }
     </style>
 </head>
@@ -131,7 +182,7 @@
             </div>
             <span class="percentage-text" id="centerPercentage"></span>
         </div>
-        <div class="module-info" id="moduleInfo"></div>
+        <div class="module-circles" id="moduleCircles"></div>
     </div>
 
     <script>
@@ -141,12 +192,11 @@
             return {
                 current: parseInt(params.get('current')) || 1,
                 total: parseInt(params.get('total')) || 10,
-                module: params.get('module') || null,
+                module: parseInt(params.get('module')) || null,
                 totalModules: parseInt(params.get('totalModules')) || null,
                 title: params.get('title') || 'Progress',
-                showModule: params.get('showModule') !== 'false',
                 compact: params.get('compact') === 'true',
-                color: params.get('color') || null // Custom color override
+                color: params.get('color') || null
             };
         }
 
@@ -167,6 +217,29 @@
         function applyCustomColor(element, color) {
             if (color) {
                 element.style.background = `linear-gradient(90deg, ${color} 0%, ${color} 100%)`;
+            }
+        }
+
+        // Create module circles
+        function createModuleCircles(currentModule, totalModules, percentage) {
+            const container = document.getElementById('moduleCircles');
+            container.innerHTML = '';
+            
+            for (let i = 1; i <= totalModules; i++) {
+                const circle = document.createElement('div');
+                circle.className = 'module-circle';
+                
+                if (i < currentModule) {
+                    // Completed modules
+                    circle.classList.add('completed');
+                } else if (i === currentModule) {
+                    // Current module with progress bar
+                    circle.classList.add('current');
+                    circle.innerHTML = `<span class="module-progress">${percentage}%</span>`;
+                }
+                // Future modules remain as empty circles
+                
+                container.appendChild(circle);
             }
         }
 
@@ -209,12 +282,11 @@
                 document.getElementById('centerPercentage').style.display = 'none';
             }
             
-            // Update module info if provided
-            if (params.module && params.totalModules && params.showModule) {
-                document.getElementById('moduleInfo').textContent = 
-                    `Module ${params.module} of ${params.totalModules}`;
+            // Create module circles if module info is provided
+            if (params.module && params.totalModules) {
+                createModuleCircles(params.module, params.totalModules, percentage);
             } else {
-                document.getElementById('moduleInfo').style.display = 'none';
+                document.getElementById('moduleCircles').style.display = 'none';
             }
         }
 
