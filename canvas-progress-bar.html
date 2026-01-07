@@ -84,8 +84,8 @@
             transition: width 0.6s ease;
             display: flex;
             align-items: center;
-            justify-content: flex-end;
-            padding-right: 10px;
+            justify-content: space-between;
+            padding: 0 10px;
             color: white;
             font-size: 11px;
             font-weight: 600;
@@ -209,14 +209,19 @@
                         progressFill.style.background = `linear-gradient(90deg, ${customColor} 0%, ${customColor} 100%)`;
                     }
                     
-                    // Add module number and percentage text inside fill if there's space
+                    // Add module text on left and percentage on right if there's space
                     if (percentage > 25) {
-                        const fillText = document.createElement('span');
-                        fillText.textContent = `Module ${currentModule} ${percentage}%`;
-                        progressFill.appendChild(fillText);
+                        const moduleText = document.createElement('span');
+                        moduleText.textContent = `Module ${currentModule}`;
+                        
+                        const percentText = document.createElement('span');
+                        percentText.textContent = `${percentage}%`;
+                        
+                        progressFill.appendChild(moduleText);
+                        progressFill.appendChild(percentText);
                     }
                     
-                    // Add centered percentage text (with module number)
+                    // Add centered text for narrow progress bars
                     const centerText = document.createElement('span');
                     centerText.className = 'percentage-text';
                     centerText.textContent = `Module ${currentModule} ${percentage}%`;
