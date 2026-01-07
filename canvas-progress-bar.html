@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Progress Bar</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 15px;
+            background: transparent;
+        }
+        
+        .progress-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #2d3b45;
+        }
+        
+        .progress-title {
+            font-weight: 600;
+        }
+        
+        .progress-stats {
+            font-weight: 500;
+            color: #666;
+        }
+        
+        .progress-bar-wrapper {
+            width: 100%;
+            height: 24px;
+            background-color: #e8eef2;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50 0%, #45a049 100%);
+            border-radius: 12px;
+            transition: width 0.6s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
+        }
+        
+        .progress-bar-fill.low {
+            background: linear-gradient(90deg, #f44336 0%, #da190b 100%);
+            box-shadow: 0 2px 4px rgba(244, 67, 54, 0.3);
+        }
+        
+        .progress-bar-fill.medium {
+            background: linear-gradient(90deg, #ff9800 0%, #fb8c00 100%);
+            box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);
+        }
+        
+        .progress-bar-fill.high {
+            background: linear-gradient(90deg, #4CAF50 0%, #45a049 100%);
+            box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
+        }
+        
+        .progress-bar-fill.complete {
+            background: linear-gradient(90deg, #2196F3 0%, #1976D2 100%);
+            box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
+        }
+        
+        .percentage-text {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+            font-weight: 600;
+            color: #2d3b45;
+            text-shadow: 0 0 3px white, 0 0 3px white, 0 0 3px white;
+        }
+        
+        .module-info {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #555;
+            font-style: italic;
+        }
+
+        /* Compact mode styling */
+        .compact .progress-header {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        
+        .compact .progress-bar-wrapper {
+            height: 18px;
+        }
+        
+        .compact .module-info {
+            font-size: 11px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-container">
+        <div class="progress-header">
+            <span class="progress-title" id="progressTitle">Progress</span>
+            <span class="progress-stats" id="progressStats"></span>
+        </div>
+        <div class="progress-bar-wrapper">
+            <div class="progress-bar-fill" id="progressFill">
+                <span id="fillPercentage"></span>
+            </div>
+            <span class="percentage-text" id="centerPercentage"></span>
+        </div>
+        <div class="module-info" id="moduleInfo"></div>
+    </div>
+
+    <script>
+        // Parse URL parameters
+        function getURLParameters() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                current: parseInt(params.get('current')) || 1,
+                total: parseInt(params.get('total')) || 10,
+                module: params.get('module') || null,
+                totalModules: parseInt(params.get('totalModules')) || null,
+                title: params.get('title') || 'Progress',
+                showModule: params.get('showModule') !== 'false',
+                compact: params.get('compact') === 'true',
+                color: params.get('color') || null // Custom color override
+            };
+        }
+
+        // Calculate percentage
+        function calculateProgress(current, total) {
+            return Math.round((current / total) * 100);
+        }
+
+        // Get color class based on percentage
+        function getColorClass(percentage) {
+            if (percentage === 100) return 'complete';
+            if (percentage >= 70) return 'high';
+            if (percentage >= 40) return 'medium';
+            return 'low';
+        }
+
+        // Apply custom color if provided
+        function applyCustomColor(element, color) {
+            if (color) {
+                element.style.background = `linear-gradient(90deg, ${color} 0%, ${color} 100%)`;
+            }
+        }
+
+        // Initialize progress bar
+        function initProgressBar() {
+            const params = getURLParameters();
+            const percentage = calculateProgress(params.current, params.total);
+            
+            // Apply compact mode if requested
+            if (params.compact) {
+                document.querySelector('.progress-container').classList.add('compact');
+            }
+            
+            // Update title
+            document.getElementById('progressTitle').textContent = params.title;
+            
+            // Update stats
+            document.getElementById('progressStats').textContent = 
+                `Page ${params.current} of ${params.total}`;
+            
+            // Update progress bar
+            const progressFill = document.getElementById('progressFill');
+            progressFill.style.width = percentage + '%';
+            
+            // Apply color class
+            const colorClass = getColorClass(percentage);
+            progressFill.className = 'progress-bar-fill ' + colorClass;
+            
+            // Apply custom color if provided
+            if (params.color) {
+                applyCustomColor(progressFill, params.color);
+            }
+            
+            // Update percentage displays
+            document.getElementById('centerPercentage').textContent = percentage + '%';
+            
+            // Only show percentage in fill if there's enough space
+            if (percentage > 15) {
+                document.getElementById('fillPercentage').textContent = percentage + '%';
+                document.getElementById('centerPercentage').style.display = 'none';
+            }
+            
+            // Update module info if provided
+            if (params.module && params.totalModules && params.showModule) {
+                document.getElementById('moduleInfo').textContent = 
+                    `Module ${params.module} of ${params.totalModules}`;
+            } else {
+                document.getElementById('moduleInfo').style.display = 'none';
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', initProgressBar);
+    </script>
+</body>
+</html>
