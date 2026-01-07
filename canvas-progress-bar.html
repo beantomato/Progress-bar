@@ -67,8 +67,8 @@
         /* Progress bar in the module flow */
         .progress-bar-inline {
             flex: 1;
-            min-width: 120px;
-            max-width: 300px;
+            min-width: 150px;
+            max-width: 350px;
             height: 24px;
             background-color: #e8eef2;
             border-radius: 12px;
@@ -209,18 +209,18 @@
                         progressFill.style.background = `linear-gradient(90deg, ${customColor} 0%, ${customColor} 100%)`;
                     }
                     
-                    // Add percentage text inside fill if there's space
-                    if (percentage > 15) {
+                    // Add module number and percentage text inside fill if there's space
+                    if (percentage > 25) {
                         const fillText = document.createElement('span');
-                        fillText.textContent = percentage + '%';
+                        fillText.textContent = `Module ${currentModule} ${percentage}%`;
                         progressFill.appendChild(fillText);
                     }
                     
-                    // Add centered percentage text
+                    // Add centered percentage text (with module number)
                     const centerText = document.createElement('span');
                     centerText.className = 'percentage-text';
-                    centerText.textContent = percentage + '%';
-                    if (percentage > 15) {
+                    centerText.textContent = `Module ${currentModule} ${percentage}%`;
+                    if (percentage > 25) {
                         centerText.style.display = 'none';
                     }
                     
