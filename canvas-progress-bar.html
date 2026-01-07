@@ -40,8 +40,35 @@
             color: #666;
         }
         
-        .progress-bar-wrapper {
-            width: 100%;
+        /* Combined module circles and progress bar */
+        .module-progress-combined {
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .module-circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            background: white;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        
+        .module-circle.completed {
+            background: #4CAF50;
+            border-color: #4CAF50;
+        }
+        
+        /* Progress bar in the module flow */
+        .progress-bar-inline {
+            flex: 1;
+            min-width: 120px;
+            max-width: 300px;
             height: 24px;
             background-color: #e8eef2;
             border-radius: 12px;
@@ -60,7 +87,7 @@
             justify-content: flex-end;
             padding-right: 10px;
             color: white;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
         }
@@ -90,57 +117,10 @@
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%);
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             color: #2d3b45;
             text-shadow: 0 0 3px white, 0 0 3px white, 0 0 3px white;
-        }
-        
-        /* Module circles visualization */
-        .module-circles {
-            margin-top: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        
-        .module-circle {
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            border: 2px solid #ccc;
-            background: white;
-            transition: all 0.3s ease;
-        }
-        
-        .module-circle.completed {
-            background: #4CAF50;
-            border-color: #4CAF50;
-        }
-        
-        .module-circle.current {
-            width: auto;
-            min-width: 60px;
-            height: 20px;
-            border-radius: 10px;
-            background: linear-gradient(90deg, #2196F3 0%, #1976D2 100%);
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 10px;
-            font-weight: 600;
-            padding: 0 8px;
-            box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
-        }
-        
-        .module-circle.current .module-progress {
-            display: flex;
-            align-items: center;
-            gap: 3px;
         }
 
         /* Compact mode styling */
@@ -149,24 +129,19 @@
             margin-bottom: 5px;
         }
         
-        .compact .progress-bar-wrapper {
-            height: 18px;
+        .compact .progress-bar-inline {
+            height: 20px;
+            min-width: 100px;
         }
         
-        .compact .module-circles {
+        .compact .module-progress-combined {
             margin-top: 8px;
             gap: 6px;
         }
         
         .compact .module-circle {
-            width: 12px;
-            height: 12px;
-        }
-        
-        .compact .module-circle.current {
-            min-width: 50px;
+            width: 16px;
             height: 16px;
-            font-size: 9px;
         }
     </style>
 </head>
@@ -176,13 +151,7 @@
             <span class="progress-title" id="progressTitle">Progress</span>
             <span class="progress-stats" id="progressStats"></span>
         </div>
-        <div class="progress-bar-wrapper">
-            <div class="progress-bar-fill" id="progressFill">
-                <span id="fillPercentage"></span>
-            </div>
-            <span class="percentage-text" id="centerPercentage"></span>
-        </div>
-        <div class="module-circles" id="moduleCircles"></div>
+        <div class="module-progress-combined" id="moduleProgressCombined"></div>
     </div>
 
     <script>
@@ -220,26 +189,57 @@
             }
         }
 
-        // Create module circles
-        function createModuleCircles(currentModule, totalModules, percentage) {
-            const container = document.getElementById('moduleCircles');
+        // Create module circles with progress bar inline
+        function createModuleProgressCombined(currentModule, totalModules, percentage, colorClass, customColor) {
+            const container = document.getElementById('moduleProgressCombined');
             container.innerHTML = '';
             
             for (let i = 1; i <= totalModules; i++) {
-                const circle = document.createElement('div');
-                circle.className = 'module-circle';
-                
-                if (i < currentModule) {
-                    // Completed modules
-                    circle.classList.add('completed');
-                } else if (i === currentModule) {
-                    // Current module with progress bar
-                    circle.classList.add('current');
-                    circle.innerHTML = `<span class="module-progress">${percentage}%</span>`;
+                if (i === currentModule) {
+                    // Current module - insert progress bar
+                    const progressBar = document.createElement('div');
+                    progressBar.className = 'progress-bar-inline';
+                    
+                    const progressFill = document.createElement('div');
+                    progressFill.className = 'progress-bar-fill ' + colorClass;
+                    progressFill.style.width = percentage + '%';
+                    
+                    // Apply custom color if provided
+                    if (customColor) {
+                        progressFill.style.background = `linear-gradient(90deg, ${customColor} 0%, ${customColor} 100%)`;
+                    }
+                    
+                    // Add percentage text inside fill if there's space
+                    if (percentage > 15) {
+                        const fillText = document.createElement('span');
+                        fillText.textContent = percentage + '%';
+                        progressFill.appendChild(fillText);
+                    }
+                    
+                    // Add centered percentage text
+                    const centerText = document.createElement('span');
+                    centerText.className = 'percentage-text';
+                    centerText.textContent = percentage + '%';
+                    if (percentage > 15) {
+                        centerText.style.display = 'none';
+                    }
+                    
+                    progressBar.appendChild(progressFill);
+                    progressBar.appendChild(centerText);
+                    container.appendChild(progressBar);
+                } else {
+                    // Other modules - show as circles
+                    const circle = document.createElement('div');
+                    circle.className = 'module-circle';
+                    
+                    if (i < currentModule) {
+                        // Completed modules
+                        circle.classList.add('completed');
+                    }
+                    // Future modules remain as empty circles
+                    
+                    container.appendChild(circle);
                 }
-                // Future modules remain as empty circles
-                
-                container.appendChild(circle);
             }
         }
 
@@ -260,33 +260,43 @@
             document.getElementById('progressStats').textContent = 
                 `Page ${params.current} of ${params.total}`;
             
-            // Update progress bar
-            const progressFill = document.getElementById('progressFill');
-            progressFill.style.width = percentage + '%';
-            
-            // Apply color class
+            // Get color class for progress bar
             const colorClass = getColorClass(percentage);
-            progressFill.className = 'progress-bar-fill ' + colorClass;
             
-            // Apply custom color if provided
-            if (params.color) {
-                applyCustomColor(progressFill, params.color);
-            }
-            
-            // Update percentage displays
-            document.getElementById('centerPercentage').textContent = percentage + '%';
-            
-            // Only show percentage in fill if there's enough space
-            if (percentage > 15) {
-                document.getElementById('fillPercentage').textContent = percentage + '%';
-                document.getElementById('centerPercentage').style.display = 'none';
-            }
-            
-            // Create module circles if module info is provided
+            // Create module circles with progress bar inline
             if (params.module && params.totalModules) {
-                createModuleCircles(params.module, params.totalModules, percentage);
+                createModuleProgressCombined(params.module, params.totalModules, percentage, colorClass, params.color);
             } else {
-                document.getElementById('moduleCircles').style.display = 'none';
+                // No modules - just show a standalone progress bar
+                const container = document.getElementById('moduleProgressCombined');
+                const progressBar = document.createElement('div');
+                progressBar.className = 'progress-bar-inline';
+                progressBar.style.maxWidth = '100%';
+                
+                const progressFill = document.createElement('div');
+                progressFill.className = 'progress-bar-fill ' + colorClass;
+                progressFill.style.width = percentage + '%';
+                
+                if (params.color) {
+                    progressFill.style.background = `linear-gradient(90deg, ${params.color} 0%, ${params.color} 100%)`;
+                }
+                
+                if (percentage > 15) {
+                    const fillText = document.createElement('span');
+                    fillText.textContent = percentage + '%';
+                    progressFill.appendChild(fillText);
+                }
+                
+                const centerText = document.createElement('span');
+                centerText.className = 'percentage-text';
+                centerText.textContent = percentage + '%';
+                if (percentage > 15) {
+                    centerText.style.display = 'none';
+                }
+                
+                progressBar.appendChild(progressFill);
+                progressBar.appendChild(centerText);
+                container.appendChild(progressBar);
             }
         }
 
