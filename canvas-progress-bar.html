@@ -64,23 +64,29 @@
         }
         
         .module-circle {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
+            height: 24px;
+            min-width: 60px;
+            padding: 0 8px;
+            border-radius: 12px;
             border: 2px solid #ccc;
             background: white;
             transition: all 0.3s ease;
             flex-shrink: 0;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 9px;
+            gap: 4px;
+            font-size: 10px;
             font-weight: 600;
             color: #666;
+            white-space: nowrap;
         }
         
         .module-circle.completed {
+            min-width: 24px;
+            width: 24px;
+            padding: 0;
+            border-radius: 50%;
             background: #4CAF50;
             border-color: #4CAF50;
         }
@@ -88,12 +94,12 @@
         .module-circle-number {
             font-size: 10px;
             line-height: 1;
-            margin-bottom: 2px;
         }
         
         .module-circle-pages {
-            font-size: 8px;
+            font-size: 9px;
             line-height: 1;
+            color: #888;
         }
         
         .module-label {
@@ -180,9 +186,14 @@
         }
         
         .compact .module-circle {
-            width: 40px;
-            height: 40px;
-            font-size: 8px;
+            height: 20px;
+            min-width: 50px;
+            font-size: 9px;
+        }
+        
+        .compact .module-circle.completed {
+            min-width: 20px;
+            width: 20px;
         }
         
         .compact .module-circle-number {
@@ -190,7 +201,7 @@
         }
         
         .compact .module-circle-pages {
-            font-size: 7px;
+            font-size: 8px;
         }
         
         .compact .module-label {
@@ -283,11 +294,9 @@
                     
                     moduleItem.appendChild(progressBar);
                     
-                    // NO label under the progress bar
-                    
                     container.appendChild(moduleItem);
                 } else {
-                    // Other modules - show as circles
+                    // Other modules - show as circles/pills
                     const moduleItem = document.createElement('div');
                     moduleItem.className = 'module-item';
                     
@@ -295,16 +304,16 @@
                     circle.className = 'module-circle';
                     
                     if (i < currentModule) {
-                        // Completed modules - green circles with NO text
+                        // Completed modules - small green circles with NO text
                         circle.classList.add('completed');
                     } else {
-                        // Future modules - grey circles WITH text
+                        // Future modules - pills WITH text (horizontal layout)
                         if (modulePagesArray && modulePagesArray[i - 1]) {
-                            const numberSpan = document.createElement('div');
+                            const numberSpan = document.createElement('span');
                             numberSpan.className = 'module-circle-number';
                             numberSpan.textContent = `M${i}`;
                             
-                            const pagesSpan = document.createElement('div');
+                            const pagesSpan = document.createElement('span');
                             pagesSpan.className = 'module-circle-pages';
                             pagesSpan.textContent = `${modulePagesArray[i - 1]}p`;
                             
@@ -314,8 +323,6 @@
                     }
                     
                     moduleItem.appendChild(circle);
-                    
-                    // NO label under any circles now
                     
                     container.appendChild(moduleItem);
                 }
