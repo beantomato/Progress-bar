@@ -64,18 +64,36 @@
         }
         
         .module-circle {
-            width: 20px;
-            height: 20px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             border: 2px solid #ccc;
             background: white;
             transition: all 0.3s ease;
             flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: 600;
+            color: #666;
         }
         
         .module-circle.completed {
             background: #4CAF50;
             border-color: #4CAF50;
+        }
+        
+        .module-circle-number {
+            font-size: 10px;
+            line-height: 1;
+            margin-bottom: 2px;
+        }
+        
+        .module-circle-pages {
+            font-size: 8px;
+            line-height: 1;
         }
         
         .module-label {
@@ -94,21 +112,35 @@
             overflow: hidden;
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
             position: relative;
-        }
-        
-        .progress-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #2196F3 0%, #1976D2 100%);
-            border-radius: 12px;
-            transition: width 0.6s ease;
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 10px;
-            color: white;
+        }
+        
+        .progress-bar-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: linear-gradient(90deg, #2196F3 0%, #1976D2 100%);
+            border-radius: 12px;
+            transition: width 0.6s ease;
+            box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
+            z-index: 1;
+        }
+        
+        .progress-bar-text {
+            position: relative;
+            z-index: 2;
             font-size: 11px;
             font-weight: 600;
-            box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
+            color: #2d3b45;
+        }
+        
+        .progress-bar-text.left {
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
         
         .progress-bar-fill.low {
@@ -130,17 +162,6 @@
             background: linear-gradient(90deg, #2196F3 0%, #1976D2 100%);
             box-shadow: 0 2px 4px rgba(33, 150, 243, 0.3);
         }
-        
-        .percentage-text {
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 11px;
-            font-weight: 600;
-            color: #2d3b45;
-            text-shadow: 0 0 3px white, 0 0 3px white, 0 0 3px white;
-        }
 
         /* Compact mode styling */
         .compact .progress-header {
@@ -159,8 +180,17 @@
         }
         
         .compact .module-circle {
-            width: 16px;
-            height: 16px;
+            width: 40px;
+            height: 40px;
+            font-size: 8px;
+        }
+        
+        .compact .module-circle-number {
+            font-size: 9px;
+        }
+        
+        .compact .module-circle-pages {
+            font-size: 7px;
         }
         
         .compact .module-label {
@@ -220,13 +250,14 @@
             
             for (let i = 1; i <= totalModules; i++) {
                 if (i === currentModule) {
-                    // Current module - insert progress bar with label
+                    // Current module - insert progress bar (no label)
                     const moduleItem = document.createElement('div');
                     moduleItem.className = 'module-item progress-item';
                     
                     const progressBar = document.createElement('div');
                     progressBar.className = 'progress-bar-inline';
                     
+                    // Create the fill (blue part)
                     const progressFill = document.createElement('div');
                     progressFill.className = 'progress-bar-fill ' + colorClass;
                     progressFill.style.width = percentage + '%';
@@ -236,41 +267,27 @@
                         progressFill.style.background = `linear-gradient(90deg, ${customColor} 0%, ${customColor} 100%)`;
                     }
                     
-                    // Add module text on left and page info on right if there's space
-                    if (percentage > 25) {
-                        const moduleText = document.createElement('span');
-                        moduleText.textContent = `Module ${currentModule}`;
-                        
-                        const pageText = document.createElement('span');
-                        pageText.textContent = `Page ${currentPage} of ${totalPages}`;
-                        
-                        progressFill.appendChild(moduleText);
-                        progressFill.appendChild(pageText);
-                    }
-                    
-                    // Add centered text for narrow progress bars
-                    const centerText = document.createElement('span');
-                    centerText.className = 'percentage-text';
-                    centerText.textContent = `Module ${currentModule} | Page ${currentPage} of ${totalPages}`;
-                    if (percentage > 25) {
-                        centerText.style.display = 'none';
-                    }
-                    
                     progressBar.appendChild(progressFill);
-                    progressBar.appendChild(centerText);
+                    
+                    // Add module text on left (always visible, spans full bar)
+                    const moduleText = document.createElement('span');
+                    moduleText.className = 'progress-bar-text left';
+                    moduleText.textContent = `Module ${currentModule}`;
+                    progressBar.appendChild(moduleText);
+                    
+                    // Add page info on right (always visible, spans full bar)
+                    const pageText = document.createElement('span');
+                    pageText.className = 'progress-bar-text';
+                    pageText.textContent = `Page ${currentPage} of ${totalPages}`;
+                    progressBar.appendChild(pageText);
+                    
                     moduleItem.appendChild(progressBar);
                     
-                    // Add label showing page count if available
-                    if (modulePagesArray && modulePagesArray[i - 1]) {
-                        const label = document.createElement('div');
-                        label.className = 'module-label';
-                        label.textContent = `${modulePagesArray[i - 1]} pages`;
-                        moduleItem.appendChild(label);
-                    }
+                    // NO label under the progress bar
                     
                     container.appendChild(moduleItem);
                 } else {
-                    // Other modules - show as circles with labels
+                    // Other modules - show as circles
                     const moduleItem = document.createElement('div');
                     moduleItem.className = 'module-item';
                     
@@ -278,20 +295,27 @@
                     circle.className = 'module-circle';
                     
                     if (i < currentModule) {
-                        // Completed modules
+                        // Completed modules - green circles with NO text
                         circle.classList.add('completed');
+                    } else {
+                        // Future modules - grey circles WITH text
+                        if (modulePagesArray && modulePagesArray[i - 1]) {
+                            const numberSpan = document.createElement('div');
+                            numberSpan.className = 'module-circle-number';
+                            numberSpan.textContent = `M${i}`;
+                            
+                            const pagesSpan = document.createElement('div');
+                            pagesSpan.className = 'module-circle-pages';
+                            pagesSpan.textContent = `${modulePagesArray[i - 1]}p`;
+                            
+                            circle.appendChild(numberSpan);
+                            circle.appendChild(pagesSpan);
+                        }
                     }
-                    // Future modules remain as empty circles
                     
                     moduleItem.appendChild(circle);
                     
-                    // Add label showing page count if available
-                    if (modulePagesArray && modulePagesArray[i - 1]) {
-                        const label = document.createElement('div');
-                        label.className = 'module-label';
-                        label.textContent = `${modulePagesArray[i - 1]} pages`;
-                        moduleItem.appendChild(label);
-                    }
+                    // NO label under any circles now
                     
                     container.appendChild(moduleItem);
                 }
