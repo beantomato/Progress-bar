@@ -24,7 +24,7 @@
         
         .progress-header {
             display: flex;
-            justify-content: flex-start;
+            justify-content: space-between;
             align-items: center;
             margin-bottom: 8px;
             font-size: 14px;
@@ -38,6 +38,12 @@
         .progress-stats {
             font-weight: 500;
             color: #666;
+        }
+        
+        .module-number-label {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
         }
         
         /* Combined module circles and progress bar */
@@ -80,7 +86,6 @@
             font-weight: 600;
             color: #666;
             white-space: nowrap;
-            cursor: pointer;
             position: relative;
         }
         
@@ -91,52 +96,18 @@
             border-radius: 50%;
             background: #4CAF50;
             border-color: #4CAF50;
-            cursor: default;
         }
         
         .module-circle.future {
             border-color: #999;
         }
         
-        .module-circle.future:hover {
-            background: #f5f5f5;
-            border-color: #666;
-            min-width: 60px;
-        }
-        
-        .module-circle-indicator {
-            font-size: 12px;
-            color: #999;
-            font-weight: bold;
-        }
-        
-        .module-circle-number {
-            font-size: 10px;
-            line-height: 1;
-            display: none;
-        }
-        
-        .module-circle-pages {
-            font-size: 9px;
-            line-height: 1;
-            color: #888;
-            display: none;
-        }
-        
-        .module-circle.future:hover .module-circle-indicator {
-            display: none;
-        }
-        
-        .module-circle.future:hover .module-circle-number,
-        .module-circle.future:hover .module-circle-pages {
-            display: inline;
-        }
-        
         .module-label {
-            font-size: 9px;
+            font-size: 10px;
             color: #666;
             text-align: center;
             white-space: nowrap;
+            font-weight: 600;
         }
         
         /* Progress bar in the module flow */
@@ -226,24 +197,12 @@
             width: 20px;
         }
         
-        .compact .module-circle.future:hover {
-            min-width: 50px;
-        }
-        
-        .compact .module-circle-indicator {
-            font-size: 11px;
-        }
-        
-        .compact .module-circle-number {
-            font-size: 9px;
-        }
-        
-        .compact .module-circle-pages {
-            font-size: 8px;
-        }
-        
         .compact .module-label {
             font-size: 8px;
+        }
+        
+        .compact .module-number-label {
+            font-size: 10px;
         }
     </style>
 </head>
@@ -251,7 +210,7 @@
     <div class="progress-container">
         <div class="progress-header">
             <span class="progress-title" id="progressTitle">Progress</span>
-            <span class="progress-stats" id="progressStats"></span>
+            <span class="module-number-label" id="moduleNumberLabel"></span>
         </div>
         <div class="module-progress-combined" id="moduleProgressCombined"></div>
     </div>
@@ -296,6 +255,9 @@
         function createModuleProgressCombined(currentModule, totalModules, modulePagesArray, currentPage, totalPages, percentage, colorClass, customColor) {
             const container = document.getElementById('moduleProgressCombined');
             container.innerHTML = '';
+            
+            // Update the module number label in the header
+            document.getElementById('moduleNumberLabel').textContent = `Module ${currentModule}`;
             
             for (let i = 1; i <= totalModules; i++) {
                 if (i === currentModule) {
@@ -345,31 +307,25 @@
                         // Completed modules - small green circles with NO text
                         circle.classList.add('completed');
                     } else {
-                        // Future modules - pills with hover functionality
+                        // Future modules - pills with pages inside
                         circle.classList.add('future');
                         
-                        // Add indicator dots (visible by default)
-                        const indicator = document.createElement('span');
-                        indicator.className = 'module-circle-indicator';
-                        indicator.textContent = '•••';
-                        circle.appendChild(indicator);
-                        
-                        // Add hidden module info (shown on hover)
+                        // Add page count inside the pill
                         if (modulePagesArray && modulePagesArray[i - 1]) {
-                            const numberSpan = document.createElement('span');
-                            numberSpan.className = 'module-circle-number';
-                            numberSpan.textContent = `M${i}`;
-                            
-                            const pagesSpan = document.createElement('span');
-                            pagesSpan.className = 'module-circle-pages';
-                            pagesSpan.textContent = `${modulePagesArray[i - 1]}p`;
-                            
-                            circle.appendChild(numberSpan);
-                            circle.appendChild(pagesSpan);
+                            const pageWord = modulePagesArray[i - 1] === 1 ? 'page' : 'pages';
+                            circle.textContent = `${modulePagesArray[i - 1]} ${pageWord}`;
                         }
                     }
                     
                     moduleItem.appendChild(circle);
+                    
+                    // Add module label below the circle (for future modules only)
+                    if (i > currentModule) {
+                        const label = document.createElement('div');
+                        label.className = 'module-label';
+                        label.textContent = `Module ${i}`;
+                        moduleItem.appendChild(label);
+                    }
                     
                     container.appendChild(moduleItem);
                 }
@@ -388,9 +344,6 @@
             
             // Update title
             document.getElementById('progressTitle').textContent = params.title;
-            
-            // Remove the stats display since it's now in the progress bar
-            document.getElementById('progressStats').style.display = 'none';
             
             // Get color class for progress bar
             const colorClass = getColorClass(percentage);
