@@ -44,9 +44,16 @@
         .module-progress-combined {
             margin-top: 12px;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
             gap: 8px;
+        }
+        
+        .module-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
         }
         
         .module-circle {
@@ -62,6 +69,13 @@
         .module-circle.completed {
             background: #4CAF50;
             border-color: #4CAF50;
+        }
+        
+        .module-label {
+            font-size: 9px;
+            color: #666;
+            text-align: center;
+            white-space: nowrap;
         }
         
         /* Progress bar in the module flow */
@@ -143,6 +157,10 @@
             width: 16px;
             height: 16px;
         }
+        
+        .compact .module-label {
+            font-size: 8px;
+        }
     </style>
 </head>
 <body>
@@ -163,6 +181,7 @@
                 total: parseInt(params.get('total')) || 10,
                 module: parseInt(params.get('module')) || null,
                 totalModules: parseInt(params.get('totalModules')) || null,
+                modulePagesArray: params.get('modulePages') ? params.get('modulePages').split(',').map(n => parseInt(n)) : null,
                 title: params.get('title') || 'Progress',
                 compact: params.get('compact') === 'true',
                 color: params.get('color') || null
@@ -190,13 +209,16 @@
         }
 
         // Create module circles with progress bar inline
-        function createModuleProgressCombined(currentModule, totalModules, currentPage, totalPages, percentage, colorClass, customColor) {
+        function createModuleProgressCombined(currentModule, totalModules, modulePagesArray, currentPage, totalPages, percentage, colorClass, customColor) {
             const container = document.getElementById('moduleProgressCombined');
             container.innerHTML = '';
             
             for (let i = 1; i <= totalModules; i++) {
                 if (i === currentModule) {
-                    // Current module - insert progress bar
+                    // Current module - insert progress bar with label
+                    const moduleItem = document.createElement('div');
+                    moduleItem.className = 'module-item';
+                    
                     const progressBar = document.createElement('div');
                     progressBar.className = 'progress-bar-inline';
                     
@@ -231,9 +253,22 @@
                     
                     progressBar.appendChild(progressFill);
                     progressBar.appendChild(centerText);
-                    container.appendChild(progressBar);
+                    moduleItem.appendChild(progressBar);
+                    
+                    // Add label showing page count if available
+                    if (modulePagesArray && modulePagesArray[i - 1]) {
+                        const label = document.createElement('div');
+                        label.className = 'module-label';
+                        label.textContent = `${modulePagesArray[i - 1]} pages`;
+                        moduleItem.appendChild(label);
+                    }
+                    
+                    container.appendChild(moduleItem);
                 } else {
-                    // Other modules - show as circles
+                    // Other modules - show as circles with labels
+                    const moduleItem = document.createElement('div');
+                    moduleItem.className = 'module-item';
+                    
                     const circle = document.createElement('div');
                     circle.className = 'module-circle';
                     
@@ -243,7 +278,17 @@
                     }
                     // Future modules remain as empty circles
                     
-                    container.appendChild(circle);
+                    moduleItem.appendChild(circle);
+                    
+                    // Add label showing page count if available
+                    if (modulePagesArray && modulePagesArray[i - 1]) {
+                        const label = document.createElement('div');
+                        label.className = 'module-label';
+                        label.textContent = `${modulePagesArray[i - 1]} pages`;
+                        moduleItem.appendChild(label);
+                    }
+                    
+                    container.appendChild(moduleItem);
                 }
             }
         }
@@ -269,7 +314,7 @@
             
             // Create module circles with progress bar inline
             if (params.module && params.totalModules) {
-                createModuleProgressCombined(params.module, params.totalModules, params.current, params.total, percentage, colorClass, params.color);
+                createModuleProgressCombined(params.module, params.totalModules, params.modulePagesArray, params.current, params.total, percentage, colorClass, params.color);
             } else {
                 // No modules - just show a standalone progress bar with page info
                 const container = document.getElementById('moduleProgressCombined');
