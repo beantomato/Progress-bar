@@ -26,7 +26,7 @@
             display: flex;
             justify-content: flex-start;
             align-items: flex-end;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
             gap: 8px;
         }
         
@@ -34,6 +34,7 @@
             font-size: 12px;
             font-weight: 600;
             color: #2d3b45;
+            line-height: 1;
         }
         
         .module-number-label {
@@ -44,7 +45,7 @@
         
         /* Combined module circles and progress bar */
         .module-progress-combined {
-            margin-top: 12px;
+            margin-top: 0;
             display: flex;
             align-items: flex-end;
             justify-content: center;
@@ -71,7 +72,8 @@
             text-align: center;
             white-space: nowrap;
             font-weight: 600;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
+            line-height: 1;
         }
         
         .module-circle {
@@ -163,7 +165,7 @@
         /* Compact mode styling */
         .compact .progress-header {
             font-size: 10px;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
         }
         
         .compact .progress-title,
@@ -177,7 +179,7 @@
         }
         
         .compact .module-progress-combined {
-            margin-top: 8px;
+            margin-top: 0;
             gap: 6px;
         }
         
@@ -194,6 +196,7 @@
         
         .compact .module-label {
             font-size: 10px;
+            margin-bottom: 3px;
         }
     </style>
 </head>
@@ -201,7 +204,6 @@
     <div class="progress-container">
         <div class="progress-header">
             <span class="progress-title" id="progressTitle">Progress</span>
-            <span class="module-number-label" id="moduleNumberLabel"></span>
         </div>
         <div class="module-progress-combined" id="moduleProgressCombined"></div>
     </div>
@@ -239,9 +241,6 @@
         function createModuleProgressCombined(currentModule, totalModules, modulePagesArray, currentPage, totalPages, percentage, colorClass, customColor) {
             const container = document.getElementById('moduleProgressCombined');
             container.innerHTML = '';
-            
-            // Remove the duplicate module number label in the header
-            document.getElementById('moduleNumberLabel').textContent = '';
             
             for (let i = 1; i <= totalModules; i++) {
                 if (i === currentModule) {
