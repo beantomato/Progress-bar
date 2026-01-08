@@ -50,7 +50,7 @@
         .module-progress-combined {
             margin-top: 12px;
             display: flex;
-            align-items: flex-start;
+            align-items: flex-end;
             justify-content: center;
             gap: 8px;
         }
@@ -69,19 +69,26 @@
             min-width: 150px;
         }
         
+        .module-label {
+            font-size: 10px;
+            color: #666;
+            text-align: center;
+            white-space: nowrap;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        
         .module-circle {
             height: 24px;
-            min-width: 30px;
-            padding: 0 8px;
+            min-width: fit-content;
+            padding: 0 12px;
             border-radius: 12px;
             border: 2px solid #ccc;
             background: white;
-            transition: all 0.3s ease;
             flex-shrink: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 4px;
             font-size: 10px;
             font-weight: 600;
             color: #666;
@@ -102,14 +109,6 @@
             border-color: #999;
         }
         
-        .module-label {
-            font-size: 10px;
-            color: #666;
-            text-align: center;
-            white-space: nowrap;
-            font-weight: 600;
-        }
-        
         /* Progress bar in the module flow */
         .progress-bar-inline {
             width: 100%;
@@ -121,7 +120,7 @@
             position: relative;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-end;
             padding: 0 10px;
         }
         
@@ -143,11 +142,6 @@
             font-size: 11px;
             font-weight: 600;
             color: #2d3b45;
-        }
-        
-        .progress-bar-text.left {
-            color: white;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
         
         .progress-bar-fill.low {
@@ -188,8 +182,8 @@
         
         .compact .module-circle {
             height: 20px;
-            min-width: 26px;
             font-size: 9px;
+            padding: 0 10px;
         }
         
         .compact .module-circle.completed {
@@ -244,13 +238,6 @@
             return 'low';
         }
 
-        // Apply custom color if provided
-        function applyCustomColor(element, color) {
-            if (color) {
-                element.style.background = `linear-gradient(90deg, ${color} 0%, ${color} 100%)`;
-            }
-        }
-
         // Create module circles with progress bar inline
         function createModuleProgressCombined(currentModule, totalModules, modulePagesArray, currentPage, totalPages, percentage, colorClass, customColor) {
             const container = document.getElementById('moduleProgressCombined');
@@ -261,9 +248,15 @@
             
             for (let i = 1; i <= totalModules; i++) {
                 if (i === currentModule) {
-                    // Current module - insert progress bar (no label)
+                    // Current module - insert progress bar with label above
                     const moduleItem = document.createElement('div');
                     moduleItem.className = 'module-item progress-item';
+                    
+                    // Add module label above progress bar
+                    const label = document.createElement('div');
+                    label.className = 'module-label';
+                    label.textContent = `Module ${i}`;
+                    moduleItem.appendChild(label);
                     
                     const progressBar = document.createElement('div');
                     progressBar.className = 'progress-bar-inline';
@@ -280,13 +273,7 @@
                     
                     progressBar.appendChild(progressFill);
                     
-                    // Add module text on left (always visible, spans full bar)
-                    const moduleText = document.createElement('span');
-                    moduleText.className = 'progress-bar-text left';
-                    moduleText.textContent = `Module ${currentModule}`;
-                    progressBar.appendChild(moduleText);
-                    
-                    // Add page info on right (always visible, spans full bar)
+                    // Add page info on right (always visible)
                     const pageText = document.createElement('span');
                     pageText.className = 'progress-bar-text';
                     pageText.textContent = `Page ${currentPage} of ${totalPages}`;
@@ -300,6 +287,14 @@
                     const moduleItem = document.createElement('div');
                     moduleItem.className = 'module-item';
                     
+                    // Add module label above the circle (for all non-current modules)
+                    if (i > currentModule) {
+                        const label = document.createElement('div');
+                        label.className = 'module-label';
+                        label.textContent = `Module ${i}`;
+                        moduleItem.appendChild(label);
+                    }
+                    
                     const circle = document.createElement('div');
                     circle.className = 'module-circle';
                     
@@ -310,22 +305,17 @@
                         // Future modules - pills with pages inside
                         circle.classList.add('future');
                         
-                        // Add page count inside the pill
+                        // Add page count inside the pill, centered
                         if (modulePagesArray && modulePagesArray[i - 1]) {
                             const pageWord = modulePagesArray[i - 1] === 1 ? 'page' : 'pages';
                             circle.textContent = `${modulePagesArray[i - 1]} ${pageWord}`;
+                            
+                            // Make pill slightly wider than text
+                            circle.style.minWidth = `${(modulePagesArray[i - 1].toString().length + pageWord.length + 2) * 7}px`;
                         }
                     }
                     
                     moduleItem.appendChild(circle);
-                    
-                    // Add module label below the circle (for future modules only)
-                    if (i > currentModule) {
-                        const label = document.createElement('div');
-                        label.className = 'module-label';
-                        label.textContent = `Module ${i}`;
-                        moduleItem.appendChild(label);
-                    }
                     
                     container.appendChild(moduleItem);
                 }
