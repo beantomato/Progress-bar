@@ -54,6 +54,13 @@
             flex-direction: column;
             align-items: center;
             gap: 4px;
+            min-width: fit-content;
+        }
+        
+        .module-item.progress-item {
+            flex: 1;
+            max-width: 350px;
+            min-width: 150px;
         }
         
         .module-circle {
@@ -80,9 +87,7 @@
         
         /* Progress bar in the module flow */
         .progress-bar-inline {
-            flex: 1;
-            min-width: 150px;
-            max-width: 350px;
+            width: 100%;
             height: 24px;
             background-color: #e8eef2;
             border-radius: 12px;
@@ -217,7 +222,7 @@
                 if (i === currentModule) {
                     // Current module - insert progress bar with label
                     const moduleItem = document.createElement('div');
-                    moduleItem.className = 'module-item';
+                    moduleItem.className = 'module-item progress-item';
                     
                     const progressBar = document.createElement('div');
                     progressBar.className = 'progress-bar-inline';
